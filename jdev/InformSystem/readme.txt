@@ -1,0 +1,1 @@
+6 semester. Course on "the development of client-server applications such as chat"
