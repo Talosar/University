@@ -8,6 +8,7 @@ public class Server implements Runnable {
     private static final String CRLF = "\r\n";
     private int id = 0; //id, назначаемое подключению. ++ для каждого нового клиента
     private Hashtable idcon = new Hashtable();  //хранение подключений
+    private ChatDB cdb = new ChatDB();
     
     @Override
     public void run() {
@@ -51,6 +52,10 @@ public class Server implements Runnable {
         broadcast(the_id, "add "+con);
     }
     
+    /*synchronized void connect(String the_id, ClientConnection con){
+        idcon.remove(the_id);
+        idcon.put(the_id, con);
+    }*/
     //отправка сообщения msg конкретному клиенту dest
     synchronized void sendTo(String dest, String msg){
         ClientConnection con = (ClientConnection)idcon.get(dest);
@@ -79,5 +84,13 @@ public class Server implements Runnable {
         if(idcon.remove(c.getId()) == c){
             broadcast(c.getId(), "delete "+c.getId());
         }
+    }
+    
+    public void regsClient(String login, String pass){
+        cdb.addClient(login, pass);
+    }
+
+    public boolean searchClient(String login, String pass) {
+        return cdb.searchClient(login, pass);
     }
 }

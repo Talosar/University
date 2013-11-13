@@ -1,34 +1,31 @@
 package client.view;
 
-import java.awt.BorderLayout;
-import java.awt.CardLayout;
-import java.awt.Dimension;
+import client.ConfigFile;
 
-import java.awt.GridBagConstraints;
-import java.awt.GridBagLayout;
+import java.awt.*;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 
-import java.awt.GridLayout;
-import java.awt.Insets;
+import javax.swing.*;
 
-import javax.swing.JFrame;
-import javax.swing.JLabel;
-import javax.swing.JList;
-import javax.swing.JPanel;
-import javax.swing.JTextField;
-import javax.swing.JTree;
+import myUtils.GUITools;
 
 public class SettingsFrame extends JFrame {
     private BorderLayout borderLayout1 = new BorderLayout();
     private JPanel jCardPan = new JPanel();
     private CardLayout cardLayout1 = new CardLayout();
-    private JList settingsList = new JList();
-    private JLabel jLabel1 = new JLabel();
-    private JPanel jConnectPan = new JPanel();
-    private JLabel jLabel2 = new JLabel();
-    private JTextField jTextField1 = new JTextField();
-    private GridBagLayout gridBagLayout1 = new GridBagLayout();
-
-    public SettingsFrame() {
+    private DefaultListModel listModel = new DefaultListModel();
+    private JList settingsList = new JList(listModel);
+    private JLabel connectLb = new JLabel("Server address");
+    private JButton saveBt = new JButton("Save");
+    private JButton cancelBt = new JButton("Cancel");
+    private JTextField addressFld = new JTextField();
+    private JFrame parentFrame; //вызывающее окно
+    private ConfigFile confFile;
+    
+    public SettingsFrame(JFrame f) {
+        parentFrame = f;
+        confFile = ((MainFrame)parentFrame).getConfigFile();
         try {
             jbInit();
         } catch (Exception e) {
@@ -41,19 +38,68 @@ public class SettingsFrame extends JFrame {
         this.setSize( new Dimension(400, 300) );
         this.setTitle( "Settings" );
         jCardPan.setLayout(cardLayout1);
+        this.setMinimumSize(new Dimension(350,200));
+        //Настройка размеров компонентов
         settingsList.setMinimumSize(new Dimension(115, 0));
         settingsList.setPreferredSize(new Dimension(115, 0));
         settingsList.setMaximumSize(new Dimension(115, 0));
-        //settingsList.getMo
-        jLabel1.setText("jLabel1");
-        jConnectPan.setLayout(gridBagLayout1);
-        jLabel2.setText("TestLabel");
-        jConnectPan.add(jLabel2, new GridBagConstraints(0, 0, 1, 1, 0.0, 0.0, GridBagConstraints.WEST, GridBagConstraints.NONE,
-                    new Insets(0, 0, 0, 0), 95, 263));
-        jConnectPan.add(jTextField1, new GridBagConstraints(1, 0, 1, 1, 1.0, 0.0, GridBagConstraints.WEST, GridBagConstraints.HORIZONTAL,
-                    new Insets(0, 0, 0, 1), 137, 258));
-        jCardPan.add(jConnectPan, "jConnectPan");
+        addressFld.setMinimumSize(new Dimension(115, 20));
+        addressFld.setPreferredSize(new Dimension(115, 20));
+        addressFld.setMaximumSize(new Dimension(115, 20));
+        GUITools.makeSameSize(new JComponent[]{saveBt, cancelBt});
+        
+        addressFld.setText(confFile.getServerAddress());
+        
+        Box connectBox = Box.createVerticalBox();
+        Box addressBox = Box.createHorizontalBox();
+        
+        addressBox.add(Box.createHorizontalStrut(12));
+        addressBox.add(connectLb);
+        addressBox.add(Box.createHorizontalStrut(5));
+        addressBox.add(addressFld);
+        addressBox.add(Box.createHorizontalGlue());
+        
+        
+        Box btBox = Box.createHorizontalBox();
+        
+        btBox.add(Box.createHorizontalGlue());
+        btBox.add(saveBt);
+        btBox.add(Box.createHorizontalStrut(12));
+        btBox.add(cancelBt);
+        btBox.add(Box.createHorizontalStrut(12));
+        connectBox.add(addressBox);
+        connectBox.add(Box.createVerticalGlue());
+        connectBox.add(btBox);
+        
+        jCardPan.add(connectBox, "connectBox");
         this.getContentPane().add(jCardPan, BorderLayout.CENTER);
+        
+        listModel.addElement("Connection");
         this.getContentPane().add(settingsList, BorderLayout.WEST);
+        
+        //добавление блоков прослушивания для кнопок
+        saveBt.addActionListener(new ActionListener() {
+                public void actionPerformed(ActionEvent e) {
+                    jSaveBt_actionPerformed(e);
+                }
+            });
+        cancelBt.addActionListener(new ActionListener() {
+                public void actionPerformed(ActionEvent e) {
+                    jCancelBt_actionPerformed(e);
+                }
+            });
+    }
+
+    private void jCancelBt_actionPerformed(ActionEvent e) {
+        parentFrame.setEnabled(true);
+        this.setVisible(false);
+        this.dispose();
+    }
+
+    private void jSaveBt_actionPerformed(ActionEvent e) {
+        confFile.saveConfig(addressFld.getText());  //добавить обработку ;;
+        parentFrame.setEnabled(true);
+        this.setVisible(false);
+        this.dispose();
     }
 }

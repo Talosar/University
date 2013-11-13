@@ -47,7 +47,7 @@ public class TestFrame extends JFrame {
         this.getContentPane().add(jScrollPane2, BorderLayout.CENTER);
         sc = new ServerConnection("127.0.0.1", this);
         sc.start();
-        sc.setName("test");
+        //sc.login("test");
     }
     
     public static void main(String[] args){

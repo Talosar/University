@@ -4,7 +4,9 @@ import java.io.*;
 import java.net.*;
 import java.util.*;
 
-class ServerConnection implements Runnable {
+import javax.swing.JFrame;
+
+public class ServerConnection implements Runnable {
     private static final int port = 6565;
     private static final String CRLF = "\r\n";
     private final String BROADCASTID = "-6";
@@ -13,11 +15,11 @@ class ServerConnection implements Runnable {
     private String id;  //ID, под которым подключение известно на сервере. Назначается сервером.
     private Thread t;
     
-    private TestFrame tf;
+    private JFrame mainFrm;
     
-    public ServerConnection (String site, TestFrame temp) throws IOException{
+    public ServerConnection (String site, JFrame temp) throws IOException{
         Socket server = new Socket(site, port);
-        tf = temp;
+        mainFrm = temp;
         in = new BufferedReader(new InputStreamReader(server.getInputStream()));
         out = new PrintWriter(server.getOutputStream(), true);
     }
@@ -30,27 +32,31 @@ class ServerConnection implements Runnable {
         }
     }
     
-    void setName(String s){ 
-        out.println("name "+s); 
+    public void login(String login, String pass){ 
+        out.println("logon "+login + " " + pass); 
     }
     
-    void delete(){
+    public void delete(){
         out.println("delete");    
     }
     
-    void send(String s, String destid){
+    public void registration(String login, String pass){
+        out.println("reg " + login + " " + pass);
+    }
+    
+    public void send(String s, String destid){
         out.println("to " + destid + " " + s);
     }
     
-    void commonChat(String msg){
+    public void commonChat(String msg){
         send("commonchat "+ id + " " + msg, BROADCASTID);
     }
     
-    void privateChat(String msg, String destid){
+    public void privateChat(String msg, String destid){
         send("privatechat "+ id + " " + msg, destid);
     }
     
-    void start(){
+    public void start(){
         t = new Thread(this);
         t.start();
     }
@@ -76,12 +82,12 @@ class ServerConnection implements Runnable {
                 String hostname = st.nextToken();
                 String name = st.nextToken(CRLF);
                 System.out.println("In ADD");
-                tf.addElement(name, id);
+                //tf.addElement(name, id);
                 //добавление в список
                 }
                 break;
             case DELETE:
-                tf.removeElement(id);
+                //tf.removeElement(id);
                 //добавить удаление из списка
                 break;
             case PRIVATECHAT: {
@@ -91,7 +97,7 @@ class ServerConnection implements Runnable {
             case COMMONCHAT: {
                 String id = st.nextToken();
                 String msg = st.nextToken(CRLF);
-                tf.append(id + ": "+ msg);
+                //tf.append(id + ": "+ msg);
                 }
                 break;
             }

@@ -5,9 +5,22 @@ import java.io.*;
 import java.util.StringTokenizer;
 
 public class ChatDB {
+    private String path = ".\\chatDB\\chatdb.cdb";
     private File f;
     
-    
+    public ChatDB(){
+        f = new File(path);
+        if(!f.exists()){
+            try {
+                System.out.println(f.getAbsolutePath());
+                f.getParentFile().mkdirs();
+                f.createNewFile();
+            } catch (IOException e) {
+                System.out.println("In ChatDB Constructor catch...");
+            }
+        }
+        
+    }
     public boolean setDBPath(String s){
         f = new File(s);
         if(f.exists() && f.isFile()){
@@ -17,15 +30,12 @@ public class ChatDB {
         }
     }
     
-    public File creatDB(){
+    public File creatDB() throws IOException{
         if(f!=null){
-            try {
                 if (f.createNewFile()) { return f; }
                 else { return null; }
-            } catch (IOException e) {
-                return null;
-            }
-        } else { return null; }
+        }
+        return null;
     }
     
     
@@ -41,7 +51,6 @@ public class ChatDB {
                     StringTokenizer token = new StringTokenizer(line, separator);
                     if(token.nextToken().equals(login)){
                         if(token.nextToken().equals(pass)){ return true; }
-                        else { return false; }
                     }
                 }
                 }finally {   br.close(); }
@@ -50,19 +59,16 @@ public class ChatDB {
         return false;
     }//searchClient
     
-    public boolean addClient(String login, String pass){
+    public void addClient(String login, String pass){
         if(!searchClient(login, pass)){
             try{
                 RandomAccessFile out = new RandomAccessFile(f, "rw");
                 try {
                     out.seek(f.length());
                     out.write((login+";;"+pass+"\n").getBytes());
-                    return true;
                 }finally{   out.close();}
             }catch (IOException e) {
-                return false;
             }
         }
-        return false;
-    }
+    }//addClient
 }

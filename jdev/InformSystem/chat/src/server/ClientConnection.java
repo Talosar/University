@@ -4,7 +4,7 @@ import java.net.*;
 import java.io.*;
 import java.util.*;
 
-class ClientConnection implements Runnable {
+public class ClientConnection implements Runnable {
     private Socket sock;
     private BufferedReader in;
     private OutputStream out;
@@ -14,6 +14,7 @@ class ClientConnection implements Runnable {
     private Server server;
     private final String BROADCASTID = "-6";
     private static final String CRLF = "\r\n";
+    
     
     public ClientConnection(Server srv, Socket s, int i){
         try{
@@ -63,6 +64,8 @@ class ClientConnection implements Runnable {
     @Override
     public void run() {
         String s;
+        String login;
+        String pass;
         StringTokenizer st;
         while((s = readline())!=null){
             st = new StringTokenizer(s);
@@ -71,11 +74,16 @@ class ClientConnection implements Runnable {
             default:
                 System.out.println("bogus keyword: " + keyword + "\r");
                 break;
-            case NAME:
-                name = st.nextToken()+
-                       (st.hasMoreElements() ? " "+st.nextToken(CRLF) : "");
-                System.out.println("["+ new Date() + "]" + this + "\r");
-                server.set(id, this);
+            case LOGON:
+                login = st.nextToken().trim();
+                pass = st.nextToken().trim();
+                if(server.searchClient(login, pass)){
+                    name = login;
+                    System.out.println("["+ new Date() + "]" + this + "\r");
+                    server.set(id, this);
+                } else {
+                    //отправить сообщение клиенту
+                }
                 break;
             case DELETE:
                 close();
@@ -89,6 +97,15 @@ class ClientConnection implements Runnable {
                     server.sendTo(dest, msg);
                 }
                 break;
+            case REG:
+                login = st.nextToken();
+                pass = st.nextToken(CRLF);
+                pass = pass.trim();
+                server.regsClient(login, pass);
+                break;
+            case CONNECT:
+                
+                break;
             }
         }
         close();
@@ -97,13 +114,15 @@ class ClientConnection implements Runnable {
     /************************************/
     /************* Keywords *************/
     /************************************/
-    private static final int NAME = 1;
+    private static final int LOGON = 1;
     private static final int DELETE = 2;
     private static final int TO = 3;
+    private static final int REG = 4;
+    private static final int CONNECT = 5;
     
     static private Hashtable keys = new Hashtable();
     static private String keystring[] = {
-        "", "name", "delete", "to"
+        "", "logon", "delete", "to", "reg", "connect"
     };
     static {
         for (int i=0; i<keystring.length; i++){

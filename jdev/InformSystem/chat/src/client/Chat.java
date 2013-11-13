@@ -1,5 +1,7 @@
 package client;
 
+import client.view.MainFrame;
+
 import java.awt.Dimension;
 import java.awt.Toolkit;
 
